@@ -19,33 +19,53 @@ def assert_optional_import(
     lib_name: str = "spanish_nlp",
 ) -> None:
     """
-    Assert an optional dependency before importing.
-    Taken and adapted from polars/_dependencies.py
+    Assert that an optional dependency is available before using it.
+
+    The module is imported only to check that it exists; it is not returned,
+    so import it normally afterwards. Adapted from polars/_dependencies.py.
 
     Parameters
     ----------
     module_name : str
-        Name of the dependency to import.
-    err_prefix : str, optional
-        Error prefix to use in the raised exception (appears before the module name).
-    err_suffix: str, optional
-        Error suffix to use in the raised exception (follows the module name).
-    min_version : {str, tuple[int]}, optional
-        If a minimum module version is required, specify it here.
-    min_err_prefix : str, optional
-        Override the standard "requires" prefix for the minimum version error message.
-    install_message : str, optional
-        Override the standard "Please install it using..." exception message fragment.
+        Importable name of the dependency (e.g. ``"sklearn"``). Dotted names
+        are allowed (e.g. ``"emoji.unicode_codes"``).
+    package_name : str, optional
+        Distribution name on PyPI, when it differs from the module name
+        (e.g. ``"scikit-learn"`` for ``sklearn``). Defaults to the root of
+        ``module_name``. Used for the install hint and the version check.
+    extra : str, optional
+        Name of the extra of this library that provides the dependency
+        (``lib_name[extra]``). If given, the install hint points to the extra;
+        otherwise it points to ``package_name`` directly.
+    min_version : str, optional
+        Minimum required version of the distribution, in PEP 440 format
+        (e.g. ``"2.0"``). The version is read from the installed package
+        metadata, not from ``module.__version__``. If the metadata cannot be
+        found, the check is skipped.
+    lib_name : str, default "spanish_nlp"
+        Name of this library, used in the install hint and error messages.
+
+    Raises
+    ------
+    ModuleNotFoundError
+        If ``module_name`` cannot be imported. The message includes the
+        ``pip`` and ``uv`` commands to install it.
+    ModuleUpgradeRequiredError
+        If the installed version is lower than ``min_version``.
 
     Examples
     --------
-    >>> from polars._dependencies import import_optional
-    >>> import_optional(
-    ...     "definitely_a_real_module",
-    ...     err_prefix="super-important package",
+    >>> assert_optional_import(
+    ...     "foobar", extra="emoji", libname="spanish_nlp"
     ... )  # doctest: +SKIP
-    ImportError: super-important package 'definitely_a_real_module' not installed.
-    Please install it using the command `pip install definitely_a_real_module`.
+    ModuleNotFoundError: 'foobar' not found.
+    Please install with either:
+    - pip install 'spanish_nlp[emoji]'
+    - uv add 'spanish_nlp[emoji]'
+
+    >>> assert_optional_import(
+    ...     "sklearn", package_name="scikit-learn", min_version="1.3"
+    ... )  # doctest: +SKIP
     """
     root = module_name.split(".", 1)[0]
     dist = package_name or root
