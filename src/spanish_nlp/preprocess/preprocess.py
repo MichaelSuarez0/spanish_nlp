@@ -124,6 +124,7 @@ class SpanishPreprocess:
             self.stopwords_list = extended_stopwords
 
         elif type == "nltk":
+            assert_optional_import("nltk", extra="nltk")
             import nltk
 
             nltk.download("stopwords")
@@ -131,6 +132,7 @@ class SpanishPreprocess:
 
             self.stopwords_list = stopwords.words("spanish")
         elif type == "spacy":
+            assert_optional_import("es_core_news_sm", extra="spacy")
             import es_core_news_sm
 
             nlp = es_core_news_sm.load(
@@ -152,6 +154,7 @@ class SpanishPreprocess:
 
     def _prepare_lemmatize_(self, force=False):
         if self.lemmatize or force:
+            assert_optional_import("es_core_news_sm", extra="spacy")
             import es_core_news_sm
 
             self.nlp_spacy = es_core_news_sm.load(
@@ -290,6 +293,7 @@ class SpanishPreprocess:
 
     def _stem_(self, text, stemmer=None):
         """TODO: add another stemmers"""
+        assert_optional_import("nltk", extra="nltk")
         from nltk.stem.snowball import SnowballStemmer
 
         stemmer = SnowballStemmer("spanish")
