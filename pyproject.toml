@@ -129,4 +129,5 @@ ignore = ["E501"] # line length is handled by the formatter
     "RUF003",
 ]
 "tests/test_preprocess.py" = ["RUF001", "RUF002", "RUF003"]
+"tests/test_barebones.py" = ["RUF001", "RUF002", "RUF003"]
 "examples/Preprocess.ipynb" = ["RUF001", "RUF002", "RUF003"]

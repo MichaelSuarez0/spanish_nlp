@@ -5,11 +5,10 @@ and full spanish_nlp[all] installations.
 How it works:
 - OPTIONAL_DEPENDENCY_METHODS maps optional features to required packages.
 - Tests for features requiring optional modules validate ModuleNotFoundError
-  with personalized messages when dependencies are missing, while core features 
+  with personalized messages when dependencies are missing, while core features
   are always tested.
 """
 
-import importlib.util
 import re
 import unittest
 
@@ -62,6 +61,7 @@ MSG_ERROR_TEMPLATE = (
     "- pip install 'spanish_nlp[{extra}]'\n"
     "- uv add 'spanish_nlp[{extra}]'"
 )
+
 
 # ---------------------------------------------------------------------------
 # Core tests: Must ALWAYS pass without any optional dependencies installed.
