@@ -4482,7 +4482,7 @@ wheels = [
 name = "spanish-nlp"
 source = { editable = "." }
 
-[package.dev-dependencies]
+[package.optional-dependencies]
 all = [
     { name = "datasets" },
     { name = "emoji" },
@@ -4501,6 +4501,39 @@ all = [
     { name = "transformers", version = "5.21.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
     { name = "unidecode" },
 ]
+augmentation = [
+    { name = "datasets" },
+    { name = "es-core-news-sm" },
+    { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.11.*'" },
+    { name = "numpy", version = "2.5.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
+    { name = "pandas", version = "2.3.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "pandas", version = "3.0.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "spacy" },
+    { name = "torch" },
+    { name = "tqdm" },
+    { name = "transformers" },
+    { name = "unidecode" },
+]
+classifiers = [
+    { name = "torch" },
+    { name = "transformers" },
+]
+emoji = [
+    { name = "emoji" },
+]
+nltk = [
+    { name = "nltk" },
+]
+spacy = [
+    { name = "es-core-news-sm" },
+    { name = "spacy" },
+]
+spellchecker = [
+    { name = "pyspellchecker" },
+]
+
+[package.dev-dependencies]
 dev = [
     { name = "parameterized" },
     { name = "pytest" },
@@ -4518,10 +4551,45 @@ notebooks = [
     { name = "ipykernel", version = "7.4.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
     { name = "ipywidgets" },
 ]
+test-spellchecker = [
+    { name = "spanish-nlp", extra = ["spellchecker"] },
+]
 
 [package.metadata]
+requires-dist = [
+    { name = "datasets", marker = "extra == 'all'", specifier = ">=3.5.0" },
+    { name = "datasets", marker = "extra == 'augmentation'" },
+    { name = "emoji", marker = "extra == 'all'", specifier = ">=2.14.1" },
+    { name = "emoji", marker = "extra == 'emoji'" },
+    { name = "es-core-news-sm", marker = "extra == 'all'", url = "https://github.com/explosion/spacy-models/releases/download/es_core_news_sm-3.8.0/es_core_news_sm-3.8.0-py3-none-any.whl" },
+    { name = "es-core-news-sm", marker = "extra == 'augmentation'", url = "https://github.com/explosion/spacy-models/releases/download/es_core_news_sm-3.8.0/es_core_news_sm-3.8.0-py3-none-any.whl" },
+    { name = "es-core-news-sm", marker = "extra == 'spacy'", url = "https://github.com/explosion/spacy-models/releases/download/es_core_news_sm-3.8.0/es_core_news_sm-3.8.0-py3-none-any.whl" },
+    { name = "nltk", marker = "extra == 'all'", specifier = ">=3.9.1" },
+    { name = "nltk", marker = "extra == 'nltk'" },
+    { name = "numpy", marker = "extra == 'all'", specifier = ">=2.2.5" },
+    { name = "numpy", marker = "extra == 'augmentation'" },
+    { name = "pandas", marker = "extra == 'all'", specifier = ">=2.2.3" },
+    { name = "pandas", marker = "extra == 'augmentation'" },
+    { name = "pyspellchecker", marker = "extra == 'all'", specifier = ">=0.8.2" },
+    { name = "pyspellchecker", marker = "extra == 'spellchecker'" },
+    { name = "spacy", marker = "extra == 'all'", specifier = ">=3.8.5,<3.9" },
+    { name = "spacy", marker = "extra == 'augmentation'" },
+    { name = "spacy", marker = "extra == 'spacy'" },
+    { name = "torch", marker = "extra == 'all'", specifier = ">=2.7.0" },
+    { name = "torch", marker = "extra == 'augmentation'" },
+    { name = "torch", marker = "extra == 'classifiers'" },
+    { name = "tqdm", marker = "extra == 'all'", specifier = ">=4.66" },
+    { name = "tqdm", marker = "extra == 'augmentation'" },
+    { name = "transformers", marker = "extra == 'all'", specifier = ">=4.51.3" },
+    { name = "transformers", marker = "extra == 'augmentation'" },
+    { name = "transformers", marker = "extra == 'classifiers'" },
+    { name = "unidecode", marker = "extra == 'all'", specifier = ">=1.4.0" },
+    { name = "unidecode", marker = "extra == 'augmentation'" },
+]
+provides-extras = ["all", "augmentation", "classifiers", "emoji", "nltk", "spacy", "spellchecker"]
 
 [package.metadata.requires-dev]
+<<<<<<< Updated upstream
 all = [
     { name = "datasets", specifier = ">=3.5.0" },
     { name = "emoji", specifier = ">=2.14.1" },
@@ -4536,6 +4604,8 @@ all = [
     { name = "transformers", specifier = ">=5.18.0" },
     { name = "unidecode", specifier = ">=1.4.0" },
 ]
+=======
+>>>>>>> Stashed changes
 dev = [
     { name = "parameterized", specifier = ">=0.9.0" },
     { name = "pytest", specifier = ">=9.1.1" },
@@ -4547,6 +4617,7 @@ notebooks = [
     { name = "ipykernel", specifier = ">=7.3.0" },
     { name = "ipywidgets", specifier = ">=8.1.9" },
 ]
+test-spellchecker = [{ name = "spanish-nlp", extras = ["spellchecker"] }]
 
 [[package]]
 name = "sphinx"
