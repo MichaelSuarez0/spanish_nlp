@@ -1,19 +1,12 @@
 """
-Test suite para SpanishPreprocess pensado para funcionar en instalación
-"barebones" (sin extras) y también completo cuando spanish_nlp[all] está
-instalado.
+Test suite for SpanishPreprocess. Designed for "barebones" (no extras)
+and full spanish_nlp[all] installations.
 
-Cómo funciona:
-- OPTIONAL_DEPENDENCY_METHODS mapea cada método/feature que depende de una
-  librería externa opcional -> el paquete que necesita.
-- HAS_* detecta en runtime si esa librería está disponible (importlib).
-- Los tests de esos métodos se marcan con @unittest.skipUnless, así que en
-  una instalación barebones se saltan solos (no fallan) y en una instalación
-  con [all] se ejecutan normalmente.
-- Todo lo demás (lower, url, hashtags, breaklines, emoticons por diccionario
-  propio, inclusive language, reduce_spam, reduplications, accents,
-  puntuación, stopwords 'default'/'extended', html tags, etc.) se prueba
-  siempre, porque no depende de nada externo.
+How it works:
+- OPTIONAL_DEPENDENCY_METHODS maps optional features to required packages.
+- Tests for features requiring optional modules validate ModuleNotFoundError
+  with personalized messages when dependencies are missing, while core features 
+  are always tested.
 """
 
 import importlib.util
@@ -26,9 +19,9 @@ from parameterized import parameterized
 from spanish_nlp import SpanishPreprocess
 
 # ---------------------------------------------------------------------------
-# Mapa de dependencias opcionales por método/feature.
-# Clave: nombre del método (o de la feature) en SpanishPreprocess.
-# Valor: nombre del paquete pip / módulo que se necesita para que funcione.
+# Optional dependency mapping per method/feature.
+# Key: method or feature name in SpanishPreprocess.
+# Value: required pip package or module name.
 # ---------------------------------------------------------------------------
 OPTIONAL_DEPENDENCY_METHODS = {
     "_stem_": "nltk",
@@ -40,8 +33,7 @@ OPTIONAL_DEPENDENCY_METHODS = {
     "_text_to_emojis_": "emoji",
 }
 
-# Métodos/features que NO requieren nada fuera de la librería base y por lo
-# tanto deben funcionar siempre, incluso en instalación barebones.
+# Core methods that must work without optional dependencies
 CORE_METHODS = [
     "_lower_",
     "_remove_url_",
@@ -71,24 +63,14 @@ MSG_ERROR_TEMPLATE = (
     "- uv add 'spanish_nlp[{extra}]'"
 )
 
-
-def _has_module(module_name):
-    return importlib.util.find_spec(module_name) is not None
-
-
-HAS_NLTK = _has_module("nltk")
-HAS_SPACY_ES = _has_module("es_core_news_sm")
-
-
 # ---------------------------------------------------------------------------
-# Tests que deben pasar SIEMPRE, sin ninguna dependencia opcional instalada.
+# Core tests: Must ALWAYS pass without any optional dependencies installed.
 # ---------------------------------------------------------------------------
 class TestSpanishPreprocessCore(unittest.TestCase):
-    """Prueba solo las funciones que no requieren librerías extra."""
+    """Tests functions that do not rely on external optional libraries."""
 
     def setUp(self):
-        # remove_stopwords=False evita instanciar con listas nltk/spacy por
-        # defecto; usamos 'default', que es un listado interno del paquete.
+        # Setting default parameters avoids instantiating nltk/spacy lists by default.
         self.preprocessor = SpanishPreprocess()
 
     def test_lower(self):
@@ -154,8 +136,7 @@ class TestSpanishPreprocessCore(unittest.TestCase):
         self.assertEqual(self.preprocessor._remove_hashtags_(text), expected)
 
     def test_convert_emoticons(self):
-        # Los emoticones de texto (:), :() se manejan con el diccionario
-        # propio de spanish_nlp.utils.emo_unicode, no con una librería externa.
+        # Text emoticons like :) and :( are handled via spanish_nlp's internal dictionary.
         text = "Este texto tiene :) y :(."
         expected = "Este texto tiene __happy_face_or_smiley_2__ y __frown_sad_andry_or_pouting_3__."
         pp_text = self.preprocessor._emoticons_to_text_(text)
@@ -258,8 +239,10 @@ class TestSpanishPreprocessCore(unittest.TestCase):
         self.assertIn("á", pp_text)
 
     def test_full_transform_without_optional_features(self):
-        """transform() completo, pero con todas las features que requieren
-        librerías externas apagadas: debe funcionar en instalación barebones."""
+        """Full transform() with external dependency features disabled;
+
+        must work seamlessly in barebones installations.
+        """
         params = {
             "lower": True,
             "remove_url": True,
@@ -289,46 +272,49 @@ class TestSpanishPreprocessCore(unittest.TestCase):
             "<b>Holaaaaaaaa a todxs</b>, este es un texto de prueba :) "
             "https://www.ejemplo.com con #unHashtag y $100.000"
         )
-        # Solo verificamos que corre sin lanzar excepciones y produce texto.
         result = pp.transform(text)
         self.assertIsInstance(result, str)
         self.assertTrue(len(result) > 0)
 
 
 # ---------------------------------------------------------------------------
-# Tests que requieren librerías opcionales. Se saltan automáticamente si el
-# paquete no está instalado (instalación barebones).
+# Optional dependency tests: Exception handling checks when modules are missing.
 # ---------------------------------------------------------------------------
 class TestSpanishPreprocessOptionalNLTK(unittest.TestCase):
     def setUp(self):
         self.preprocessor = SpanishPreprocess()
+        self.msg_error = MSG_ERROR_TEMPLATE.format(
+            module="nltk",
+            extra="nltk",
+        )
 
-    @unittest.skipUnless(HAS_NLTK, "requiere 'nltk' (spanish_nlp[all])")
     def test_stem(self):
         self.preprocessor.stem = True
         text = "Este texto contiene varias palabras."
-        self.assertTrue(self.preprocessor._stem_(text) != text)
 
-    @unittest.skipUnless(HAS_NLTK, "requiere 'nltk' (spanish_nlp[all])")
+        with pytest.raises(ModuleNotFoundError, match=re.escape(self.msg_error)):
+            self.preprocessor._stem_(text)
+
     def test_stopwords_nltk(self):
-        self.preprocessor._prepare_stopwords_(type="nltk")
-        self.assertTrue(len(self.preprocessor.stopwords_list) > 0)
+        with pytest.raises(ModuleNotFoundError, match=re.escape(self.msg_error)):
+            self.preprocessor._prepare_stopwords_(type="nltk")
 
 
 class TestSpanishPreprocessOptionalSpacy(unittest.TestCase):
     def setUp(self):
         self.preprocessor = SpanishPreprocess()
+        self.msg_error = MSG_ERROR_TEMPLATE.format(
+            module="es_core_news_sm",
+            extra="spacy",
+        )
 
-    @unittest.skipUnless(HAS_SPACY_ES, "requiere 'es_core_news_sm' (spanish_nlp[all])")
     def test_lemmatize(self):
-        self.preprocessor._prepare_lemmatize_(force=True)
-        text = "Este texto contiene varias palabras."
-        self.assertTrue(self.preprocessor._lemmatize_(text) != text)
+        with pytest.raises(ModuleNotFoundError, match=re.escape(self.msg_error)):
+            self.preprocessor._prepare_lemmatize_(force=True)
 
-    @unittest.skipUnless(HAS_SPACY_ES, "requiere 'es_core_news_sm' (spanish_nlp[all])")
     def test_stopwords_spacy(self):
-        self.preprocessor._prepare_stopwords_(type="spacy")
-        self.assertTrue(len(self.preprocessor.stopwords_list) > 0)
+        with pytest.raises(ModuleNotFoundError, match=re.escape(self.msg_error)):
+            self.preprocessor._prepare_stopwords_(type="spacy")
 
 
 class TestSpanishPreprocessOptionalEmoji(unittest.TestCase):
