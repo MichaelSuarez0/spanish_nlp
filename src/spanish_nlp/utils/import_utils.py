@@ -12,14 +12,14 @@ class ModuleUpgradeRequiredError(ImportError):
 def assert_optional_import(
     module_name: str,
     *,
-    package_name: str
-    | None = None,  # if PyPi name is not the same (sklearn -> scikit-learn)
+    package_name: str | None = None,  # if PyPi name differs (sklearn -> scikit-learn)
     extra: str | None = None,  # library extras: mylib[extra]
     min_version: str | None = None,
     lib_name: str = "spanish_nlp",
 ) -> None:
     """
     Assert that an optional dependency is available before using it.
+    If not, print a personalized message.
 
     The module is imported only to check that it exists; it is not returned,
     so import it normally afterwards. Adapted from polars/_dependencies.py.
